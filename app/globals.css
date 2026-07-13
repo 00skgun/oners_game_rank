@@ -80,6 +80,9 @@ a { color: inherit; text-decoration: none; }
 .set-editor { padding: 14px; background: #fff; border: 1px solid var(--line); }
 .set-fields { display: grid; grid-template-columns: repeat(5,1fr) 70px; align-items: end; gap: 10px; margin-top: 10px; }
 .set-fields label { color: #666c75; font-size: 12px; font-weight: 700; }
+.player-editor { display: grid; grid-template-columns: minmax(260px,1fr) repeat(3,90px) 70px; align-items: end; gap: 10px; padding: 12px; background: #fff; border: 1px solid var(--line); }
+.player-editor label { color: #666c75; font-size: 12px; font-weight: 700; }
+.player-editor input { width: 100%; padding: 9px; color: var(--ink); background: #fff; border: 1px solid #cfd2d7; }
 
 @media (max-width: 720px) {
   .nav { flex-wrap: wrap; padding-top: 14px; }
@@ -94,4 +97,6 @@ a { color: inherit; text-decoration: none; }
   .admin-row .admin-label { grid-column: 1/-1; }
   .admin-row .btn { grid-column: 1/-1; }
   .set-fields { grid-template-columns: repeat(2,1fr); }
+  .player-editor { grid-template-columns: repeat(3,1fr); }
+  .player-editor > div,.player-editor .btn { grid-column: 1/-1; }
 }
