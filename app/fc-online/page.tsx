@@ -5,7 +5,7 @@ import {FcTable} from '@/components/FcTable';
 import {fcMatches as fallbackMatches,fcPlayers as fallbackPlayers,type FcMatch,type FcPlayer} from '@/lib/data';
 import {createBrowserSupabase} from '@/lib/supabase/browser';
 import {rankFc} from '@/lib/rankings/fc-ranking';
-import {initial} from '@/lib/data';
+import {initial,useInitialBRecord} from '@/lib/data';
 import {FcBracket} from '@/components/FcBracket';
 
 export default function Fc(){
@@ -14,7 +14,7 @@ export default function Fc(){
     supabase.from('fc_players').select('id,name,group_name,seed'),
     supabase.from('fc_matches').select('id,group_name,round_number,player_a_id,player_b_id,player_a_score,player_b_score,status'),
   ]).then(([p,m])=>{if(!p.data?.length||!m.data?.length)return;const ps:FcPlayer[]=p.data.map(x=>({id:x.id,name:x.name,group:x.group_name,seed:x.seed}));const byId=new Map(ps.map(x=>[x.id,x.name]));const ms:FcMatch[]=m.data.map(x=>({id:x.id,group:x.group_name,round:x.round_number,a:byId.get(x.player_a_id)??'-',b:byId.get(x.player_b_id)??'-',sa:x.player_a_score,sb:x.player_b_score,status:x.status as FcMatch['status']}));setPlayers(ps);setMatches(ms)})},[]);
-  const ranked=(group:string)=>rankFc(players.filter(p=>p.group===group),matches.filter(m=>m.group===group),group==='B'?initial:{});
+  const ranked=(group:string)=>rankFc(players.filter(p=>p.group===group),matches.filter(m=>m.group===group),group==='B'&&useInitialBRecord(matches)?initial:{});
   const groups=Object.fromEntries(['A','B','C','D'].map(g=>[g,ranked(g)]));
   const quarterfinals=[
     {label:'8강 1경기 · A1 vs C2',a:groups.A[0]?.name??'A조 1위',b:groups.C[1]?.name??'C조 2위'},

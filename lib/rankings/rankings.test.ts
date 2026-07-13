@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { rankFc } from "./fc-ranking";
 import { kda } from "./lol-stats";
 import type { FcMatch, FcPlayer } from "../data";
+import { useInitialBRecord } from "../data";
 
 const players: FcPlayer[] = [
   { id: "1", name: "Alpha", group: "A", seed: 2 },
@@ -42,5 +43,23 @@ describe("LoL stats", () => {
 
   it("returns Perfect when deaths are zero", () => {
     expect(kda({ name: "A", sets: 1, kills: 2, deaths: 0, assists: 3 })).toBe("Perfect");
+  });
+});
+
+describe("FC carried record", () => {
+  it("removes the B-group carry when all three detailed matches exist", () => {
+    const rows: FcMatch[] = [1, 2, 3].map((round) => ({
+      id: round, group: "B", round, a: "정민호", b: "최건영",
+      sa: 1, sb: 2, status: "\uC644\uB8CC",
+    }));
+    expect(useInitialBRecord(rows)).toBe(false);
+  });
+
+  it("keeps the carry until all three detailed matches are complete", () => {
+    const rows: FcMatch[] = [1, 2].map((round) => ({
+      id: round, group: "B", round, a: "정민호", b: "최건영",
+      sa: 1, sb: 2, status: "\uC644\uB8CC",
+    }));
+    expect(useInitialBRecord(rows)).toBe(true);
   });
 });
