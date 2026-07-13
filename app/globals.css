@@ -70,6 +70,16 @@ a { color: inherit; text-decoration: none; }
 .btn { padding: 12px 16px; color: #17191c; background: var(--accent); border: 0; font-weight: 900; cursor: pointer; }
 .footer { padding: 26px 0; color: #7c8188; background: #fff; border-top: 1px solid var(--line); }
 .empty { padding: 46px; color: #7b8088; text-align: center; }
+.admin-login { max-width: 520px; margin-top: 24px; }
+.admin-head { display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding: 14px 16px; background: #fff; border: 1px solid var(--line); }
+.btn.secondary { color: #fff; background: #30343a; }
+.admin-list { display: grid; gap: 8px; }
+.admin-row { display: grid; grid-template-columns: 90px minmax(90px,1fr) 72px 20px 72px minmax(90px,1fr) 70px; align-items: center; gap: 8px; padding: 12px; background: #fff; border: 1px solid var(--line); }
+.admin-row input,.set-fields input,.set-fields select { width: 100%; padding: 9px; color: var(--ink); background: #fff; border: 1px solid #cfd2d7; }
+.admin-label { color: #666c75; font-size: 13px; font-weight: 700; }
+.set-editor { padding: 14px; background: #fff; border: 1px solid var(--line); }
+.set-fields { display: grid; grid-template-columns: repeat(5,1fr) 70px; align-items: end; gap: 10px; margin-top: 10px; }
+.set-fields label { color: #666c75; font-size: 12px; font-weight: 700; }
 
 @media (max-width: 720px) {
   .nav { flex-wrap: wrap; padding-top: 14px; }
@@ -80,4 +90,8 @@ a { color: inherit; text-decoration: none; }
   .hero { padding: 42px 0 36px; }
   .match { grid-template-columns: 55px 1fr auto 1fr; }
   .match .state { display: none; }
+  .admin-row { grid-template-columns: 1fr 1fr 55px 12px 55px 1fr; }
+  .admin-row .admin-label { grid-column: 1/-1; }
+  .admin-row .btn { grid-column: 1/-1; }
+  .set-fields { grid-template-columns: repeat(2,1fr); }
 }
