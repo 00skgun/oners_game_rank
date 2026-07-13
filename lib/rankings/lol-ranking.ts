@@ -1,0 +1,2 @@
+export type LolMatch={a:string;b:string;aw:number;bw:number;status:'완료'|'예정'};
+export function rankLol(teams:string[],matches:LolMatch[]){const r=new Map(teams.map(name=>[name,{name,played:0,w:0,l:0,sf:0,sa:0}]));for(const m of matches.filter(x=>x.status==='완료')){const a=r.get(m.a)!,b=r.get(m.b)!;a.played++;b.played++;a.sf+=m.aw;a.sa+=m.bw;b.sf+=m.bw;b.sa+=m.aw;if(m.aw>m.bw){a.w++;b.l++}else{b.w++;a.l++}}return [...r.values()].sort((a,b)=>b.w-a.w||(b.sf-b.sa)-(a.sf-a.sa)||b.sf-a.sf)}

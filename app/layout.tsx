@@ -1,0 +1,3 @@
+import './globals.css'; import Link from 'next/link';
+export const metadata={title:'ONERS CUP',description:'FC Online · League of Legends 대회 순위'};
+export default function Layout({children}:{children:React.ReactNode}){return <html lang="ko"><body><header className="header"><nav className="wrap nav"><Link className="brand" href="/"><b>O</b>NERS CUP</Link><div className="links"><Link href="/">홈</Link><Link href="/fc-online">FC Online</Link><Link href="/lol">League of Legends</Link><Link href="/admin">관리자</Link></div></nav></header>{children}<footer className="footer"><div className="wrap">© 2026 ONERS CUP · 모든 일정은 Asia/Seoul 기준</div></footer></body></html>}
