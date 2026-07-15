@@ -12,10 +12,11 @@ export const lolTeams=['Team WIND','ONERS A','ONERS B','ONERS C'];
 export const lolMatches=[
   {a:'ONERS B',b:'ONERS C',aw:2,bw:1,status:'완료' as const,playedAt:'2026-07-12'},
   {a:'ONERS A',b:'Team WIND',aw:2,bw:0,status:'완료' as const,playedAt:'2026-07-13'},
+  {a:'ONERS A',b:'ONERS C',aw:2,bw:0,status:'완료' as const,playedAt:'2026-07-16'},
 ];
 export const lolStats=[
   {name:'ONERS B',sets:3,kills:69,deaths:62,assists:153},
-  {name:'ONERS C',sets:3,kills:62,deaths:69,assists:88},
-  {name:'ONERS A',sets:2,kills:50,deaths:14,assists:104},
+  {name:'ONERS C',sets:5,kills:81,deaths:137,assists:117},
+  {name:'ONERS A',sets:4,kills:118,deaths:33,assists:194},
   {name:'Team WIND',sets:2,kills:14,deaths:50,assists:26},
 ];
