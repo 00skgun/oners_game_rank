@@ -96,6 +96,19 @@ a { color: inherit; text-decoration: none; }
 .bracket-player { display: grid; grid-template-columns: 24px 1fr 16px; align-items: center; gap: 8px; padding: 11px; border-top: 1px solid var(--line); }
 .bracket-player strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .seed-dot { display: grid; width: 22px; height: 22px; place-items: center; color: #fff; background: #34383e; font-size: 11px; }
+.bracket-player.is-winner { background: #fff9e8; }
+.bracket-player.is-winner strong { color: #8a6100; }
+.bracket-score { font-size: 18px; font-weight: 900; text-align: right; }
+.bracket-advanced { padding: 8px 11px; color: #6d510d; background: #fff3cf; border-top: 1px solid #f0db9c; font-size: 12px; text-align: right; }
+.bracket-match.is-complete { border-left-color: #d99a00; }
+.champion-banner { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; padding: 16px 18px; color: #fff; background: #25282d; border-left: 4px solid var(--accent); }
+.champion-banner span { color: #d2d5da; font-size: 13px; }
+.champion-banner b { color: #f2c14b; font-size: 22px; }
+.tournament-editor { padding: 16px; background: #fff; border: 1px solid var(--line); }
+.tournament-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.tournament-fields { display: grid; grid-template-columns: minmax(130px,1fr) 70px 18px 70px minmax(130px,1fr) 82px; align-items: end; gap: 8px; }
+.tournament-fields label { color: #666c75; font-size: 12px; font-weight: 700; }
+.tournament-fields input,.tournament-fields select { width: 100%; margin-top: 5px; padding: 9px; color: var(--ink); background: #fff; border: 1px solid #cfd2d7; }
 
 @media (max-width: 720px) {
   .nav { flex-wrap: wrap; padding-top: 14px; }
@@ -113,4 +126,6 @@ a { color: inherit; text-decoration: none; }
   .player-editor { grid-template-columns: repeat(3,1fr); }
   .player-editor > div,.player-editor .btn { grid-column: 1/-1; }
   .admin-create-grid { grid-template-columns: 1fr; }
+  .tournament-fields { grid-template-columns: 1fr 55px 12px 55px 1fr; }
+  .tournament-fields .btn { grid-column: 1/-1; }
 }
