@@ -57,10 +57,10 @@ export default function Fc() {
   const groups = Object.fromEntries(['A', 'B', 'C', 'D'].map(g => [g, ranked(g)]));
   const nameById = useMemo(() => new Map(players.map(p => [p.id, p.name])), [players]);
   const predictedQuarterfinals: BracketMatch[] = [
-    {label: '8강 1경기 · A1 vs C2', a: groups.A[0]?.name ?? 'A조 1위', b: groups.C[1]?.name ?? 'C조 2위'},
-    {label: '8강 2경기 · B1 vs D2', a: groups.B[0]?.name ?? 'B조 1위', b: groups.D[1]?.name ?? 'D조 2위'},
-    {label: '8강 3경기 · C1 vs B2', a: groups.C[0]?.name ?? 'C조 1위', b: groups.B[1]?.name ?? 'B조 2위'},
-    {label: '8강 4경기 · D1 vs A2', a: groups.D[0]?.name ?? 'D조 1위', b: groups.A[1]?.name ?? 'A조 2위'},
+    {label: '8강 1경기 · 5판 3선승', a: groups.A[0]?.name ?? 'A조 1위', b: groups.C[1]?.name ?? 'C조 2위'},
+    {label: '8강 2경기 · 5판 3선승', a: groups.B[0]?.name ?? 'B조 1위', b: groups.D[1]?.name ?? 'D조 2위'},
+    {label: '8강 3경기 · 5판 3선승', a: groups.C[0]?.name ?? 'C조 1위', b: groups.B[1]?.name ?? 'B조 2위'},
+    {label: '8강 4경기 · 5판 3선승', a: groups.D[0]?.name ?? 'D조 1위', b: groups.A[1]?.name ?? 'A조 2위'},
   ];
 
   const makeMatch = (stage: string, number: number, fallback: BracketMatch): BracketMatch => {
@@ -80,12 +80,12 @@ export default function Fc() {
 
   const quarterfinals = predictedQuarterfinals.map((fallback, i) => makeMatch('quarterfinal', i + 1, fallback));
   const semifinals = [
-    makeMatch('semifinal', 1, {label: '4강 1경기', a: '8강 1경기 승자', b: '8강 2경기 승자'}),
-    makeMatch('semifinal', 2, {label: '4강 2경기', a: '8강 3경기 승자', b: '8강 4경기 승자'}),
+    makeMatch('semifinal', 1, {label: '4강 1경기 · 5판 3선승', a: '8강 1경기 승자', b: '8강 2경기 승자'}),
+    makeMatch('semifinal', 2, {label: '4강 2경기 · 5판 3선승', a: '8강 3경기 승자', b: '8강 4경기 승자'}),
   ];
   const finals = [
-    makeMatch('final', 1, {label: '결승', a: '4강 1경기 승자', b: '4강 2경기 승자'}),
-    makeMatch('third', 1, {label: '3·4위전', a: '4강 1경기 패자', b: '4강 2경기 패자'}),
+    makeMatch('final', 1, {label: '결승 · 7판 4선승', a: '4강 1경기 승자', b: '4강 2경기 승자'}),
+    makeMatch('third', 1, {label: '3·4위전 · 5판 3선승', a: '4강 1경기 패자', b: '4강 2경기 패자'}),
   ];
   const champion = finals[0].winner;
 

@@ -48,7 +48,7 @@ export default function Admin(){
     {!isAdmin?<section className="card admin-login"><h2>로그인</h2><form className="admin-form" onSubmit={signIn}><label>이메일<input type="email" required value={email} onChange={e=>setEmail(e.target.value)}/></label><label>비밀번호<input type="password" required value={password} onChange={e=>setPassword(e.target.value)}/></label><button className="btn" disabled={busy}>{busy?'확인 중...':'로그인'}</button></form></section>:<>
       <div className="admin-head"><span>{user.email}</span><button className="btn secondary" onClick={signOut}>로그아웃</button></div>
       <section className="section"><h2>FC Online 경기 결과</h2><p className="sub">점수를 입력하고 저장하면 완료 경기로 변경됩니다.</p><div className="admin-list">{fcMatches.map(m=><FcEditor key={m.id} match={m} a={name(m.player_a_id)} b={name(m.player_b_id)} supabase={supabase!} onSaved={load}/>)}</div></section>
-      <section className="section"><h2>FC Online 토너먼트</h2><p className="sub">처음 한 번 대진을 만든 뒤 세트 스코어를 저장하세요. 승자와 패자가 다음 경기로 자동 반영됩니다.</p><FcTournamentAdmin players={players} matches={fcMatches} series={fcSeries} games={fcTournamentGames} supabase={supabase!} onSaved={load}/></section>
+      <section className="section"><h2>FC Online 토너먼트</h2><p className="sub">8강·4강·3/4위전은 5판 3선승, 결승은 7판 4선승입니다. 승자와 패자는 다음 경기로 자동 반영됩니다.</p><FcTournamentAdmin players={players} matches={fcMatches} series={fcSeries} games={fcTournamentGames} supabase={supabase!} onSaved={load}/></section>
       <section className="section"><h2>LoL 경기 추가</h2><div className="admin-create-grid"><NewLolMatch teams={teams} supabase={supabase!} onSaved={load}/><NewLolSet matches={lolMatches} sets={lolSets} teams={teams} players={lolPlayers} supabase={supabase!} onSaved={load}/></div></section>
       <section className="section"><h2>LoL 세트 기록</h2><p className="sub">킬과 어시스트만 입력합니다. 상대 팀 킬이 자동으로 팀 데스가 됩니다.</p><div className="admin-list">{lolSets.map(s=>{const m=lolMatches.find(x=>x.id===s.match_id);return m?<LolSetEditor key={s.id} set={s} match={m} a={team(m.team_a_id)} b={team(m.team_b_id)} teams={teams} supabase={supabase!} onSaved={load}/>:null})}</div></section>
       <section className="section"><h2>LoL 개인 기록</h2><p className="sub">세트별 선수의 킬·데스·어시스트를 입력합니다.</p><div className="admin-list">{playerStats.map(stat=>{const player=lolPlayers.find(x=>x.id===stat.player_id),set=lolSets.find(x=>x.id===stat.set_id),match=set?lolMatches.find(x=>x.id===set.match_id):undefined;return player&&set&&match?<PlayerStatEditor key={stat.id} stat={stat} player={player} label={`${team(match.team_a_id)} vs ${team(match.team_b_id)} · ${set.set_number}세트`} supabase={supabase!} onSaved={load}/>:null})}</div></section>
@@ -65,14 +65,14 @@ function FcTournamentAdmin({players,matches,series,games,supabase,onSaved}:{play
     if(seeds.some(x=>!x)){alert('각 조의 1·2위가 정해졌는지 확인하세요.');return}
     setCreating(true);
     const rows=[
-      {stage:'quarterfinal',match_number:1,player_a_id:seeds[0],player_b_id:seeds[5],required_wins:2,status:'예정'},
-      {stage:'quarterfinal',match_number:2,player_a_id:seeds[2],player_b_id:seeds[7],required_wins:2,status:'예정'},
-      {stage:'quarterfinal',match_number:3,player_a_id:seeds[4],player_b_id:seeds[3],required_wins:2,status:'예정'},
-      {stage:'quarterfinal',match_number:4,player_a_id:seeds[6],player_b_id:seeds[1],required_wins:2,status:'예정'},
-      {stage:'semifinal',match_number:1,player_a_id:null,player_b_id:null,required_wins:2,status:'예정'},
-      {stage:'semifinal',match_number:2,player_a_id:null,player_b_id:null,required_wins:2,status:'예정'},
-      {stage:'final',match_number:1,player_a_id:null,player_b_id:null,required_wins:2,status:'예정'},
-      {stage:'third',match_number:1,player_a_id:null,player_b_id:null,required_wins:2,status:'예정'},
+      {stage:'quarterfinal',match_number:1,player_a_id:seeds[0],player_b_id:seeds[5],required_wins:3,status:'예정'},
+      {stage:'quarterfinal',match_number:2,player_a_id:seeds[2],player_b_id:seeds[7],required_wins:3,status:'예정'},
+      {stage:'quarterfinal',match_number:3,player_a_id:seeds[4],player_b_id:seeds[3],required_wins:3,status:'예정'},
+      {stage:'quarterfinal',match_number:4,player_a_id:seeds[6],player_b_id:seeds[1],required_wins:3,status:'예정'},
+      {stage:'semifinal',match_number:1,player_a_id:null,player_b_id:null,required_wins:3,status:'예정'},
+      {stage:'semifinal',match_number:2,player_a_id:null,player_b_id:null,required_wins:3,status:'예정'},
+      {stage:'final',match_number:1,player_a_id:null,player_b_id:null,required_wins:4,status:'예정'},
+      {stage:'third',match_number:1,player_a_id:null,player_b_id:null,required_wins:3,status:'예정'},
     ];
     const {error}=await supabase.from('fc_tournament_series').upsert(rows,{onConflict:'stage,match_number'});
     alert(error?'대진 생성 실패: '+error.message:'현재 조별 순위로 토너먼트 대진을 만들었습니다.');
@@ -87,6 +87,7 @@ function FcTournamentAdmin({players,matches,series,games,supabase,onSaved}:{play
 }
 
 function FcTournamentEditor({item,allSeries,games,players,supabase,onSaved}:{item:FcSeries;allSeries:FcSeries[];games:FcTournamentGame[];players:Player[];supabase:NonNullable<ReturnType<typeof createBrowserSupabase>>;onSaved:()=>void}){
+  const requiredWins=item.stage==='final'?4:3;
   const [a,setA]=useState(item.player_a_id??''),[b,setB]=useState(item.player_b_id??'');
   const currentGames=games.filter(g=>g.series_id===item.id);
   const [aw,setAw]=useState(String(currentGames.filter(g=>g.winner_id===item.player_a_id).length));
@@ -103,10 +104,10 @@ function FcTournamentEditor({item,allSeries,games,players,supabase,onSaved}:{ite
   async function save(){
     const aWins=Number(aw),bWins=Number(bw);
     if(!a||!b||a===b)return alert('서로 다른 두 선수를 선택하세요.');
-    if(aWins===bWins||Math.max(aWins,bWins)!==item.required_wins||Math.min(aWins,bWins)<0||Math.min(aWins,bWins)>=item.required_wins)return alert(`${item.required_wins}:0 또는 ${item.required_wins}:1처럼 최종 세트 스코어를 입력하세요.`);
+    if(aWins===bWins||Math.max(aWins,bWins)!==requiredWins||Math.min(aWins,bWins)<0||Math.min(aWins,bWins)>=requiredWins)return alert(`${requiredWins}:0, ${requiredWins}:1처럼 최종 세트 스코어를 입력하세요.`);
     setSaving(true);
     const winner=aWins>bWins?a:b,loser=aWins>bWins?b:a;
-    const {error}=await supabase.from('fc_tournament_series').update({player_a_id:a,player_b_id:b,winner_id:winner,status:'완료'}).eq('id',item.id);
+    const {error}=await supabase.from('fc_tournament_series').update({player_a_id:a,player_b_id:b,required_wins:requiredWins,winner_id:winner,status:'완료'}).eq('id',item.id);
     if(!error){
       await supabase.from('fc_tournament_games').delete().eq('series_id',item.id);
       const winners=[...Array(aWins).fill(a),...Array(bWins).fill(b)];
@@ -126,12 +127,12 @@ function FcTournamentEditor({item,allSeries,games,players,supabase,onSaved}:{ite
     if(!error)onSaved();
   }
   return <div className="tournament-editor">
-    <div className="tournament-editor-head"><b>{stageName[item.stage]??item.stage} {item.stage==='final'||item.stage==='third'?'':item.match_number+'경기'}</b>{item.winner_id&&<span className="badge">{players.find(p=>p.id===item.winner_id)?.name} 진출</span>}</div>
+    <div className="tournament-editor-head"><b>{stageName[item.stage]??item.stage} {item.stage==='final'||item.stage==='third'?'':item.match_number+'경기'} · {requiredWins===4?'7판 4선승':'5판 3선승'}</b>{item.winner_id&&<span className="badge">{players.find(p=>p.id===item.winner_id)?.name} 진출</span>}</div>
     <div className="tournament-fields">
       <label>선수 1<select value={a} onChange={e=>setA(e.target.value)}><option value="">선택</option>{players.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
-      <label>세트<input type="number" min="0" max={item.required_wins} value={aw} onChange={e=>setAw(e.target.value)}/></label>
+      <label>세트<input type="number" min="0" max={requiredWins} value={aw} onChange={e=>setAw(e.target.value)}/></label>
       <span>:</span>
-      <label>세트<input type="number" min="0" max={item.required_wins} value={bw} onChange={e=>setBw(e.target.value)}/></label>
+      <label>세트<input type="number" min="0" max={requiredWins} value={bw} onChange={e=>setBw(e.target.value)}/></label>
       <label>선수 2<select value={b} onChange={e=>setB(e.target.value)}><option value="">선택</option>{players.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></label>
       <button className="btn" disabled={saving||!a||!b} onClick={save}>저장</button>
     </div>
