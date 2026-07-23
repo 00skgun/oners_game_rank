@@ -51,7 +51,7 @@ export default function Admin(){
       <section className="section"><h2>FC Online 토너먼트</h2><p className="sub">8강·4강·3/4위전은 5판 3선승, 결승은 7판 4선승입니다. 승자와 패자는 다음 경기로 자동 반영됩니다.</p><FcTournamentAdmin players={players} matches={fcMatches} series={fcSeries} games={fcTournamentGames} supabase={supabase!} onSaved={load}/></section>
       <section className="section"><h2>LoL 경기 추가</h2><div className="admin-create-grid"><NewLolMatch teams={teams} supabase={supabase!} onSaved={load}/><NewLolSet matches={lolMatches} sets={lolSets} teams={teams} players={lolPlayers} supabase={supabase!} onSaved={load}/></div></section>
       <section className="section"><h2>LoL 세트 기록</h2><p className="sub">킬과 어시스트만 입력합니다. 상대 팀 킬이 자동으로 팀 데스가 됩니다.</p><div className="admin-list">{lolSets.map(s=>{const m=lolMatches.find(x=>x.id===s.match_id);return m?<LolSetEditor key={s.id} set={s} match={m} a={team(m.team_a_id)} b={team(m.team_b_id)} teams={teams} supabase={supabase!} onSaved={load}/>:null})}</div></section>
-      <section className="section"><h2>LoL 개인 기록</h2><p className="sub">세트별 선수의 킬·데스·어시스트를 입력합니다.</p><div className="admin-list">{playerStats.map(stat=>{const player=lolPlayers.find(x=>x.id===stat.player_id),set=lolSets.find(x=>x.id===stat.set_id),match=set?lolMatches.find(x=>x.id===set.match_id):undefined;return player&&set&&match?<PlayerStatEditor key={stat.id} stat={stat} player={player} label={`${team(match.team_a_id)} vs ${team(match.team_b_id)} · ${set.set_number}세트`} supabase={supabase!} onSaved={load}/>:null})}</div></section>
+      <section className="section"><h2>LoL 개인 기록 일괄 입력</h2><p className="sub">경기를 선택하고 모든 선수의 K/D/A를 입력한 뒤 맨 아래 버튼을 한 번만 누르세요.</p><LolPlayerStatsBulk matches={lolMatches} sets={lolSets} teams={teams} players={lolPlayers} stats={playerStats} supabase={supabase!} onSaved={load}/></section>
     </>}
   </main>;
 }
@@ -158,6 +158,48 @@ function getTournamentSeeds(players:Player[],matches:FcMatch[]){
 function LolSetEditor({set,match,a,b,teams,supabase,onSaved}:{set:LolSet;match:LolMatch;a:string;b:string;teams:Team[];supabase:NonNullable<ReturnType<typeof createBrowserSupabase>>;onSaved:()=>void}){const [ak,setAk]=useState(String(set.team_a_kills)),[aa,setAa]=useState(String(set.team_a_assists)),[bk,setBk]=useState(String(set.team_b_kills)),[ba,setBa]=useState(String(set.team_b_assists)),[winner,setWinner]=useState(set.winner_team_id),[saving,setSaving]=useState(false);async function save(){setSaving(true);const {error}=await supabase.from('lol_match_sets').update({team_a_kills:Number(ak),team_a_assists:Number(aa),team_b_kills:Number(bk),team_b_assists:Number(ba),winner_team_id:winner,updated_at:new Date().toISOString()}).eq('id',set.id);alert(error?'저장 실패: 관리자 권한 SQL을 확인하세요.':'저장했습니다.');setSaving(false);if(!error)onSaved()}return <div className="set-editor"><div className="admin-label">{a} vs {b} · {set.set_number}세트</div><div className="set-fields"><label>{a} 킬<input type="number" min="0" value={ak} onChange={e=>setAk(e.target.value)}/></label><label>{a} 어시<input type="number" min="0" value={aa} onChange={e=>setAa(e.target.value)}/></label><label>{b} 킬<input type="number" min="0" value={bk} onChange={e=>setBk(e.target.value)}/></label><label>{b} 어시<input type="number" min="0" value={ba} onChange={e=>setBa(e.target.value)}/></label><label>승자<select value={winner} onChange={e=>setWinner(e.target.value)}>{teams.filter(t=>t.id===match.team_a_id||t.id===match.team_b_id).map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label><button className="btn" disabled={saving} onClick={save}>저장</button></div></div>}
 
 function PlayerStatEditor({stat,player,label,supabase,onSaved}:{stat:PlayerSetStat;player:LolPlayer;label:string;supabase:NonNullable<ReturnType<typeof createBrowserSupabase>>;onSaved:()=>void}){const [kills,setKills]=useState(String(stat.kills)),[deaths,setDeaths]=useState(String(stat.deaths)),[assists,setAssists]=useState(String(stat.assists)),[saving,setSaving]=useState(false);async function save(){setSaving(true);const {error}=await supabase.from('lol_player_set_stats').update({kills:Number(kills),deaths:Number(deaths),assists:Number(assists),updated_at:new Date().toISOString()}).eq('id',stat.id);alert(error?'저장 실패: 개인 기록 권한 SQL을 확인하세요.':'저장했습니다.');setSaving(false);if(!error)onSaved()}return <div className="player-editor"><div><div className="admin-label">{label}</div><b>{player.real_name}({player.nickname})</b><span className="player-tag"> {player.position}</span></div><label>킬<input type="number" min="0" value={kills} onChange={e=>setKills(e.target.value)}/></label><label>데스<input type="number" min="0" value={deaths} onChange={e=>setDeaths(e.target.value)}/></label><label>어시<input type="number" min="0" value={assists} onChange={e=>setAssists(e.target.value)}/></label><button className="btn" disabled={saving} onClick={save}>저장</button></div>}
+
+function LolPlayerStatsBulk({matches,sets,teams,players,stats,supabase,onSaved}:{matches:LolMatch[];sets:LolSet[];teams:Team[];players:LolPlayer[];stats:PlayerSetStat[];supabase:NonNullable<ReturnType<typeof createBrowserSupabase>>;onSaved:()=>void}){
+  const available=matches.filter(match=>sets.some(set=>set.match_id===match.id));
+  const [matchId,setMatchId]=useState('');
+  const [draft,setDraft]=useState<Record<number,{kills:string;deaths:string;assists:string}>>({});
+  const [saving,setSaving]=useState(false);
+  const teamName=(id:string)=>teams.find(t=>t.id===id)?.name??'-';
+  useEffect(()=>{if(!matchId&&available.length)setMatchId(available[available.length-1].id)},[available,matchId]);
+  useEffect(()=>{const next:Record<number,{kills:string;deaths:string;assists:string}>={};for(const stat of stats)next[stat.id]={kills:String(stat.kills),deaths:String(stat.deaths),assists:String(stat.assists)};setDraft(next)},[stats]);
+  const match=matches.find(m=>m.id===matchId);
+  const matchSets=sets.filter(s=>s.match_id===matchId).sort((a,b)=>a.set_number-b.set_number);
+  const setStats=(setId:number)=>stats.filter(stat=>stat.set_id===setId);
+  function change(id:number,key:'kills'|'deaths'|'assists',value:string){setDraft(old=>({...old,[id]:{...(old[id]??{kills:'0',deaths:'0',assists:'0'}),[key]:value}}))}
+  async function saveAll(){
+    const target=matchSets.flatMap(set=>setStats(set.id));
+    if(!target.length)return alert('저장할 개인 기록이 없습니다. 먼저 세트를 추가하세요.');
+    setSaving(true);
+    const rows=target.map(stat=>({id:stat.id,set_id:stat.set_id,player_id:stat.player_id,kills:Number(draft[stat.id]?.kills??0),deaths:Number(draft[stat.id]?.deaths??0),assists:Number(draft[stat.id]?.assists??0),updated_at:new Date().toISOString()}));
+    const {error}=await supabase.from('lol_player_set_stats').upsert(rows,{onConflict:'id'});
+    alert(error?'개인 기록 저장 실패: '+error.message:'이 경기의 개인 기록을 모두 저장했습니다.');
+    setSaving(false);
+    if(!error)onSaved();
+  }
+  if(!available.length)return <div className="card">먼저 LoL 경기와 세트를 추가하세요.</div>;
+  return <div className="bulk-stats">
+    <label className="bulk-match-select">입력할 경기<select value={matchId} onChange={e=>setMatchId(e.target.value)}>{[...available].reverse().map(m=><option key={m.id} value={m.id}>{m.scheduled_at?.slice(0,10)??'날짜 미정'} · {teamName(m.team_a_id)} vs {teamName(m.team_b_id)}</option>)}</select></label>
+    {match&&matchSets.map(set=><div className="bulk-set" key={set.id}>
+      <div className="bulk-set-head"><b>{set.set_number}세트</b><span>{teamName(match.team_a_id)} {set.team_a_kills} : {set.team_b_kills} {teamName(match.team_b_id)}</span></div>
+      <div className="bulk-team-grid">{[match.team_a_id,match.team_b_id].map(teamId=><div className="bulk-team" key={teamId}>
+        <h4>{teamName(teamId)}</h4>
+        <div className="bulk-stat-header"><span>선수</span><span>킬</span><span>데스</span><span>어시</span></div>
+        {setStats(set.id).map(stat=>players.find(p=>p.id===stat.player_id)).filter((p):p is LolPlayer=>Boolean(p&&p.team_id===teamId)).map(player=>{const stat=setStats(set.id).find(s=>s.player_id===player.id)!;return <div className="bulk-stat-row" key={stat.id}>
+          <div><b>{player.real_name}</b><small>{player.nickname}</small></div>
+          <input aria-label={`${player.real_name} 킬`} type="number" min="0" value={draft[stat.id]?.kills??'0'} onChange={e=>change(stat.id,'kills',e.target.value)}/>
+          <input aria-label={`${player.real_name} 데스`} type="number" min="0" value={draft[stat.id]?.deaths??'0'} onChange={e=>change(stat.id,'deaths',e.target.value)}/>
+          <input aria-label={`${player.real_name} 어시`} type="number" min="0" value={draft[stat.id]?.assists??'0'} onChange={e=>change(stat.id,'assists',e.target.value)}/>
+        </div>})}
+      </div>)}</div>
+    </div>)}
+    <button className="btn bulk-save" disabled={saving||!matchSets.length} onClick={saveAll}>{saving?'전체 저장 중...':'이 경기 개인 기록 전체 저장'}</button>
+  </div>;
+}
 
 function NewLolMatch({teams,supabase,onSaved}:{teams:Team[];supabase:NonNullable<ReturnType<typeof createBrowserSupabase>>;onSaved:()=>void}){const [a,setA]=useState(''),[b,setB]=useState(''),[date,setDate]=useState(''),[saving,setSaving]=useState(false);useEffect(()=>{if(!a&&teams[0])setA(teams[0].id);if(!b&&teams[1])setB(teams[1].id)},[teams,a,b]);async function save(){if(!a||!b||a===b)return alert('서로 다른 두 팀을 선택하세요.');setSaving(true);const {error}=await supabase.from('lol_matches').insert({team_a_id:a,team_b_id:b,scheduled_at:date?new Date(date).toISOString():null,status:'예정'});alert(error?'경기 생성 실패: '+error.message:'경기를 추가했습니다.');setSaving(false);if(!error)onSaved()}return <div className="card"><h3>새 경기</h3><div className="admin-form"><label>팀 1<select value={a} onChange={e=>setA(e.target.value)}>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label><label>팀 2<select value={b} onChange={e=>setB(e.target.value)}>{teams.map(t=><option key={t.id} value={t.id}>{t.name}</option>)}</select></label><label>경기 일시<input type="datetime-local" value={date} onChange={e=>setDate(e.target.value)}/></label><button className="btn" disabled={saving} onClick={save}>경기 추가</button></div></div>}
 
